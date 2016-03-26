@@ -40,68 +40,21 @@ public class Main {
 
     
     
-    
-    private static void SecureDownload(DbxClientV2 client, String userPath, String serverPath){
-    	
-    	try(FileOutputStream out = new FileOutputStream(userPath)){
-        	client.files().download(serverPath).download(out);
-        	
-        } catch (DownloadErrorException e) {
-        	System.out.println("DownloadErrorException");
-		} catch (DbxException e) {
-			System.out.println("DbxException");
-		} catch (IOException e) {
-			System.out.println("IOException");
-		}
-    }
-    
-    
-    
-    
-    private static void SecureUpload(DbxClientV2 client, BinaryEncryptor be, String userPath, String serverPath){
-    	byte[] temp = null;
-    	try{
-    		temp = Files.readAllBytes(Paths.get(userPath));
-    		
-    	} catch(IOException e){
-    		System.out.println("tempError");
-    	}
-    	
-    	byte[] encryptedTemp = be.encrypt(temp);
-    	String path = userPath+".encrypted";
-    	System.out.println(path);
-    	try{
-    		FileUtils.writeByteArrayToFile(new File(path), encryptedTemp);
-    	}catch(IOException e){
-    		System.out.println("writeError");
-    	}
-    	
-    	
-    	
-    	try (InputStream in = new FileInputStream(path)) {
-            FileMetadata metadata = client.files().uploadBuilder(serverPath+".encrypted").uploadAndFinish(in);
-        } catch (UploadErrorException e) {
-        	System.out.println("UploadErrorException");
-		} catch (DbxException e) {
-			System.out.println("DbxException");
-			
-		} catch (IOException e) {
-			System.out.println("IOException");
-		}
-    }
-    
-    
     public static void main(String args[]) throws DbxException, IOException {
     	
     	String userPath = "/home/simon/dropbox/";
-    	BasicBinaryEncryptor be = new BasicBinaryEncryptor();
     	String key = "qwerty";
-    	be.setPassword(key);
         // Create Dropbox client
         DbxRequestConfig config = new DbxRequestConfig("dropbox/java-tutorial", "en_US");
         DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
+        
+        Account userA = new Account("simonq", "qwerty", key, client, userPath);
+        if(!userA.validate()){
+        	System.out.println("username/password/key incorrect");
+        	System.exit(0);
+        }
         // Get current account info
-        FullAccount account = client.users().getCurrentAccount();
+        FullAccount account = userA.client.users().getCurrentAccount();
         System.out.println(account.getName().getDisplayName());
 
         // Get files and folder metadata from Dropbox root directory
@@ -124,9 +77,9 @@ public class Main {
         }
 
         // Upload "test.txt" to Dropbox
-        SecureUpload(client, be, "/home/simon/apache-maven-3.3.9-bin.zip", "/maven.txt");
-        
-        SecureDownload(client, userPath+"test.txt", "/test.txt");
+        //userA.SecureUpload("/home/simon/dropbox/userlist.txt", "/userList.txt");
+        userA.addUser("simonq", "qwerty");
+        //userA.SecureDownload(userPath+"maven.zip", "/maven.txt");
         
     }
 }
