@@ -73,7 +73,7 @@ public class Main {
     	JLabel dataLabel = new JLabel("User File Path");
     	dataLabel.setPreferredSize(new Dimension(150, 20));
     	mainframe.getContentPane().add(dataLabel);
-    	final JTextField field1 = new JTextField("/home/users/");
+    	final JTextField field1 = new JTextField("/home/simon/");
     	field1.setPreferredSize(new Dimension(200, 20));
     	
     	final JTextField field2 = new JTextField("/");
@@ -107,11 +107,12 @@ public class Main {
     	});
     	mainframe.getContentPane().add(undoButton);
     	mainframe.pack();
-    	mainframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    	mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     	mainframe.setVisible(true);
     	}
     
     public static void loginJFrame(final JFrame mainframe, final String[] userPass, final String key, final DbxClientV2 client, final JFrame frame, final String userPath){
+    	final boolean[] admin = new boolean[1];
     	mainframe.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 50, 50));
     	JLabel dataLabel = new JLabel("Username:");
     	dataLabel.setPreferredSize(new Dimension(80, 20));
@@ -119,7 +120,7 @@ public class Main {
     	final JTextField field1 = new JTextField("");
     	field1.setPreferredSize(new Dimension(130, 20));
     	
-    	final JTextField field2 = new JTextField("");
+    	final JPasswordField field2 = new JPasswordField("");
     	field2.setPreferredSize(new Dimension(130, 20));
     	
     	mainframe.getContentPane().add(field1);
@@ -128,39 +129,59 @@ public class Main {
     	mainframe.getContentPane().add(dataLabel2);
     	mainframe.getContentPane().add(field2);
     	JButton okButton = new JButton("Login");
+    	JButton adminButton = new JButton("Admin");
     	okButton.addActionListener(new ActionListener(){
-    	public void actionPerformed(ActionEvent e){
-    	Scanner s1 = new Scanner(field1.getText());
-    	Scanner s2 = new Scanner(field2.getText());
-    	userPass[0] = s1.next();
-    	userPass[1] = s2.next();
-    	System.out.println(userPass[0]);
-    	System.out.println(userPass[1]);
-    	s1.close();
-    	s2.close();
-    	mainframe.dispose();
-    	}
+	    	public void actionPerformed(ActionEvent e){
+		    	Scanner s1 = new Scanner(field1.getText());
+		    	//Scanner s2 = new Scanner(field2.getPassword());
+		    	admin[0] = false;
+		    	userPass[0] = s1.next();
+		    	userPass[1] = String.valueOf(field2.getPassword());
+		    	System.out.println(userPass[0]);
+		    	System.out.println(userPass[1]);
+		    	s1.close();
+		    	//s2.close();
+		    	mainframe.dispose();
+	    	}
+    	});
+    	adminButton.addActionListener(new ActionListener(){
+	    	public void actionPerformed(ActionEvent e){
+		    	Scanner s1 = new Scanner(field1.getText());
+		    	//Scanner s2 = new Scanner(field2.getPassword());
+		    	admin[0] = true;
+		    	userPass[0] = s1.next();
+		    	userPass[1] = String.valueOf(field2.getPassword());
+		    	System.out.println(userPass[0]);
+		    	System.out.println(userPass[1]);
+		    	s1.close();
+		    	//s2.close();
+		    	mainframe.dispose();
+	    	}
     	});
     	WindowListener wl = new WindowAdapter(){
     		@Override
     		public void windowClosed(WindowEvent e){
-    			continueLogin(userPass, key, client, userPath, frame);
+    			continueLogin(userPass, key, client, userPath, frame, admin[0]);
     		}
     	};
     	mainframe.addWindowListener(wl);
     	mainframe.getContentPane().add(okButton);
+    	mainframe.getContentPane().add(adminButton);
     	mainframe.pack();
-    	mainframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    	mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     	mainframe.setVisible(true);
     	}
     
     
     
-    public static void continueLogin(String[] userPass, String key, DbxClientV2 client, String userPath, JFrame mainframe){
+    public static void continueLogin(String[] userPass, String key, DbxClientV2 client, String userPath, JFrame mainframe, boolean admin){
     	final Account userA = new Account(userPass[0], userPass[1], key, client, userPath);
         if(!userA.validate()){
         	System.out.println("username/password/key incorrect");
         	System.exit(0);
+        }
+        if(admin){
+        	
         }
         // Get current account info
         //FullAccount account = userA.client.users().getCurrentAccount();
