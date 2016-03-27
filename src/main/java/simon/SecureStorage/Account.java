@@ -178,7 +178,7 @@ public class Account {
     		Files.delete(Paths.get(userPath+".encrypted"));
     		
     	} catch(IOException e){
-    		System.out.println("toByteError");
+    		System.out.println("deleteError");
     	}
     }
 	
