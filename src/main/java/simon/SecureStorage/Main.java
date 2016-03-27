@@ -46,7 +46,7 @@ import org.jasypt.util.binary.*;
 public class Main {
 	
 	
-	
+	//token to access dropbox account
     private static final String ACCESS_TOKEN = "YVMLBbT9LfAAAAAAAAAACO8ieMv5s9sBa27LQ9CoA3NMoUF_s97z3DIyY_qWs-zu";
 
     
@@ -55,7 +55,8 @@ public class Main {
     	
     	final JFrame mainframe = new JFrame("SecureStorage");
     	final JFrame loginframe = new JFrame("Login");
-    	String userPath = "/home/simon/dropbox/";
+    	
+    	String userPath = null;
     	String key = "qwerty";
         // Create Dropbox client
         DbxRequestConfig config = new DbxRequestConfig("dropbox/java-tutorial", "en_US");
@@ -68,12 +69,14 @@ public class Main {
         
     }
     
-    public static void upDownJFrame(final Account acc, JFrame mainframe){
+    
+    //JFrame allowing the upload/download of files from given paths
+    public static void upDownJFrame(final Account acc, JFrame mainframe, String userPath){
     	mainframe.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 50, 50));
     	JLabel dataLabel = new JLabel("User File Path");
     	dataLabel.setPreferredSize(new Dimension(150, 20));
     	mainframe.getContentPane().add(dataLabel);
-    	final JTextField field1 = new JTextField("/home/simon/");
+    	final JTextField field1 = new JTextField(userPath);
     	field1.setPreferredSize(new Dimension(200, 20));
     	
     	final JTextField field2 = new JTextField("/");
@@ -89,7 +92,7 @@ public class Main {
     	public void actionPerformed(ActionEvent e){
     	Scanner s1 = new Scanner(field1.getText());
     	Scanner s2 = new Scanner(field2.getText());
-    	acc.SecureUpload(s1.next(), s2.next());
+    	acc.SecureUpload(s1.next(), s2.next(), false);
     	s1.close();
     	s2.close();
     	}
@@ -100,7 +103,7 @@ public class Main {
     	public void actionPerformed(ActionEvent e){
     		Scanner s1 = new Scanner(field1.getText());
         	Scanner s2 = new Scanner(field2.getText());
-        	acc.SecureDownload(s1.next(), s2.next());
+        	acc.SecureDownload(s1.next(), s2.next(), false);
         	s1.close();
         	s2.close();
     	}
@@ -111,57 +114,76 @@ public class Main {
     	mainframe.setVisible(true);
     	}
     
+    
+    //allows input of username, password, and directory to use
     public static void loginJFrame(final JFrame mainframe, final String[] userPass, final String key, final DbxClientV2 client, final JFrame frame, final String userPath){
     	final boolean[] admin = new boolean[1];
+    	final String[] path = new String[1];
     	mainframe.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 50, 50));
+    	
     	JLabel dataLabel = new JLabel("Username:");
     	dataLabel.setPreferredSize(new Dimension(80, 20));
     	mainframe.getContentPane().add(dataLabel);
+    	
     	final JTextField field1 = new JTextField("");
     	field1.setPreferredSize(new Dimension(130, 20));
-    	
-    	final JPasswordField field2 = new JPasswordField("");
-    	field2.setPreferredSize(new Dimension(130, 20));
-    	
     	mainframe.getContentPane().add(field1);
+    	
     	JLabel dataLabel2 = new JLabel("Password:");
     	dataLabel2.setPreferredSize(new Dimension(150, 20));
     	mainframe.getContentPane().add(dataLabel2);
+    	
+    	final JPasswordField field2 = new JPasswordField("");
+    	field2.setPreferredSize(new Dimension(130, 20));
     	mainframe.getContentPane().add(field2);
+    	
+    	JLabel dataLabel3 = new JLabel("Directory to Use");
+    	dataLabel.setPreferredSize(new Dimension(80, 20));
+    	mainframe.getContentPane().add(dataLabel3);
+    	
+    	final JTextField field3 = new JTextField("/");
+    	field3.setPreferredSize(new Dimension(130, 20));
+    	mainframe.getContentPane().add(field3);
+    	
     	JButton okButton = new JButton("Login");
     	JButton adminButton = new JButton("Admin");
     	okButton.addActionListener(new ActionListener(){
 	    	public void actionPerformed(ActionEvent e){
 		    	Scanner s1 = new Scanner(field1.getText());
-		    	//Scanner s2 = new Scanner(field2.getPassword());
+		    	Scanner s2 = new Scanner(field3.getText());
 		    	admin[0] = false;
 		    	userPass[0] = s1.next();
 		    	userPass[1] = String.valueOf(field2.getPassword());
+		    	path[0] = s2.next();
+		    	if((path[0].charAt(path[0].length()-1) != '/'))path[0]+="/";
 		    	System.out.println(userPass[0]);
 		    	System.out.println(userPass[1]);
 		    	s1.close();
-		    	//s2.close();
+		    	s2.close();
 		    	mainframe.dispose();
 	    	}
     	});
     	adminButton.addActionListener(new ActionListener(){
 	    	public void actionPerformed(ActionEvent e){
 		    	Scanner s1 = new Scanner(field1.getText());
-		    	//Scanner s2 = new Scanner(field2.getPassword());
+		    	Scanner s2 = new Scanner(field3.getText());
 		    	admin[0] = true;
 		    	userPass[0] = s1.next();
 		    	userPass[1] = String.valueOf(field2.getPassword());
+		    	path[0] = s2.next();
 		    	System.out.println(userPass[0]);
 		    	System.out.println(userPass[1]);
 		    	s1.close();
-		    	//s2.close();
+		    	s2.close();
 		    	mainframe.dispose();
 	    	}
     	});
+    	
     	WindowListener wl = new WindowAdapter(){
     		@Override
     		public void windowClosed(WindowEvent e){
-    			continueLogin(userPass, key, client, userPath, frame, admin[0]);
+    			//moves forward with login when login is pressed
+    			continueLogin(userPass, key, client, path[0], frame, admin[0]);
     		}
     	};
     	mainframe.addWindowListener(wl);
@@ -173,15 +195,80 @@ public class Main {
     	}
     
     
+    //JFrame window for admin functions, add/remove user/admin
+    public static void adminJFrame(final Account acc, JFrame mainframe){
+    	mainframe.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 50, 50));
+    	JLabel dataLabel = new JLabel("Username");
+    	dataLabel.setPreferredSize(new Dimension(150, 20));
+    	mainframe.getContentPane().add(dataLabel);
+    	final JTextField field1 = new JTextField("");
+    	field1.setPreferredSize(new Dimension(200, 20));
+    	
+    	final JTextField field2 = new JTextField("");
+    	field2.setPreferredSize(new Dimension(200, 20));
+    	
+    	mainframe.getContentPane().add(field1);
+    	JLabel dataLabel2 = new JLabel("Password");
+    	dataLabel2.setPreferredSize(new Dimension(150, 20));
+    	mainframe.getContentPane().add(dataLabel2);
+    	mainframe.getContentPane().add(field2);
+    	JButton okButton = new JButton("Add User");
+    	okButton.addActionListener(new ActionListener(){
+	    	public void actionPerformed(ActionEvent e){
+		    	Scanner s1 = new Scanner(field1.getText());
+		    	Scanner s2 = new Scanner(field2.getText());
+		    	acc.addUser(s1.next(), s2.next());
+		    	s1.close();
+		    	s2.close();
+	    	}
+    	});
+    	mainframe.getContentPane().add(okButton);
+    	JButton undoButton = new JButton("Remove User");
+    	undoButton.addActionListener(new ActionListener(){
+    	public void actionPerformed(ActionEvent e){
+    		Scanner s1 = new Scanner(field1.getText());
+        	acc.removeUser(s1.next());
+        	s1.close();
+    	}
+    	});
+    	mainframe.getContentPane().add(undoButton);
+    	JButton adminButton = new JButton("Add Admin");
+    	adminButton.addActionListener(new ActionListener(){
+    	public void actionPerformed(ActionEvent e){
+    		Scanner s1 = new Scanner(field1.getText());
+        	acc.addAdmin(s1.next());
+        	s1.close();
+    	}
+    	});
+    	mainframe.getContentPane().add(adminButton);
+    	JButton removeAdminButton = new JButton("Remove Admin");
+    	removeAdminButton.addActionListener(new ActionListener(){
+	    	public void actionPerformed(ActionEvent e){
+	    		Scanner s1 = new Scanner(field1.getText());
+	        	acc.removeAdmin(s1.next());
+	        	s1.close();
+	    	}
+    	});
+    	mainframe.getContentPane().add(removeAdminButton);
+    	mainframe.pack();
+    	mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    	mainframe.setVisible(true);
+    	}
     
+    
+    //called after login is pressed
     public static void continueLogin(String[] userPass, String key, DbxClientV2 client, String userPath, JFrame mainframe, boolean admin){
+    	//System.out.println(userPath);
     	final Account userA = new Account(userPass[0], userPass[1], key, client, userPath);
+    	//check username/password
         if(!userA.validate()){
         	System.out.println("username/password/key incorrect");
         	System.exit(0);
         }
-        if(admin){
-        	
+        //check account is admin if accessing admin functions
+        if(admin && !userA.adminValidate()){
+        	System.out.println("not admin");
+        	System.exit(0);
         }
         // Get current account info
         //FullAccount account = userA.client.users().getCurrentAccount();
@@ -210,8 +297,12 @@ public class Main {
             }catch(DbxException e){System.out.println("ListError2");}
         }
         
-        
-        upDownJFrame(userA, mainframe);
+        if(admin){
+        	adminJFrame(userA, mainframe);
+        }
+        else{
+        	upDownJFrame(userA, mainframe, userPath);
+        }
         // Upload "test.txt" to Dropbox
         //userA.SecureUpload("/home/simon/dropbox/userlist.txt", "/userList.txt");
         //userA.addUser("simonq", "qwerty");
