@@ -171,6 +171,7 @@ public class Main {
 		    	userPass[0] = s1.next();
 		    	userPass[1] = String.valueOf(field2.getPassword());
 		    	path[0] = s2.next();
+		    	if((path[0].charAt(path[0].length()-1) != '/'))path[0]+="/";
 		    	System.out.println(userPass[0]);
 		    	System.out.println(userPass[1]);
 		    	s1.close();
