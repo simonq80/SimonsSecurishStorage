@@ -1,21 +1,24 @@
 package simon.SecureStorage;
 
-import com.dropbox.core.DbxDownloader;
+
 import com.dropbox.core.DbxException;
-import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.v1.DbxEntry;
-import com.dropbox.core.v1.DbxClientV1;
+
+
+
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.DownloadErrorException;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.ListFolderResult;
-import com.dropbox.core.v2.files.Metadata;
+//import com.dropbox.core.v2.files.FileMetadata;
+
+
 import com.dropbox.core.v2.files.UploadErrorException;
-import com.dropbox.core.v2.users.FullAccount;
+
 import com.dropbox.core.v2.files.WriteMode;
 
-import java.util.Date;
+
 import java.util.List;
+
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -64,8 +67,8 @@ public class Account {
 		
 		for(int i = 0; i < users.size(); i++){
 			currentLine = users.get(i);
-			System.out.println(currentLine);
-			System.out.println(currentLine.length());
+			//System.out.println(currentLine);
+			//System.out.println(currentLine.length());
 			userPass = currentLine.split(":");
 
 			if(userPass[0].equals(username)){
@@ -91,8 +94,8 @@ public class Account {
 		
 		for(int i = 0; i < users.size(); i++){
 			currentLine = users.get(i);
-			System.out.println(currentLine);
-			System.out.println(currentLine.length());
+			//System.out.println(currentLine);
+			//System.out.println(currentLine.length());
 
 			if(currentLine.equals(username)){
 				
@@ -240,6 +243,9 @@ public class Account {
         	
         } catch (DownloadErrorException e) {
         	System.out.println("DownloadErrorException");
+        	final JPanel panel = new JPanel();
+        	JOptionPane.showMessageDialog(panel, "Invalid Server Path", "Error", JOptionPane.ERROR_MESSAGE);
+        	return;
 		} catch (DbxException e) {
 			System.out.println("DbxException");
 		} catch (IOException e) {
@@ -268,6 +274,9 @@ public class Account {
     		
     	} catch(IOException e){
     		System.out.println("toByteError");
+    		final JPanel panel = new JPanel();
+        	JOptionPane.showMessageDialog(panel, "Invalid User Path", "Error", JOptionPane.ERROR_MESSAGE);
+        	return;
     	}
     	
     	
@@ -288,6 +297,9 @@ public class Account {
     		
     	} catch(IOException e){
     		System.out.println("tempError");
+    		final JPanel panel = new JPanel();
+        	JOptionPane.showMessageDialog(panel, "Invalid User Path", "Error", JOptionPane.ERROR_MESSAGE);
+        	return;
     	}
     	
     	byte[] encryptedTemp = be.encrypt(temp);
@@ -302,9 +314,13 @@ public class Account {
     	
     	//upload file to dropbox
     	try (InputStream in = new FileInputStream(path)) {
-            FileMetadata metadata = client.files().uploadBuilder(serverPath+".encrypted").withMode(WriteMode.OVERWRITE).uploadAndFinish(in);
+            //FileMetadata metadata = 
+    		client.files().uploadBuilder(serverPath+".encrypted").withMode(WriteMode.OVERWRITE).uploadAndFinish(in);
         } catch (UploadErrorException e) {
         	System.out.println("UploadErrorException");
+        	final JPanel panel = new JPanel();
+        	JOptionPane.showMessageDialog(panel, "Invalid Server Path", "Error", JOptionPane.ERROR_MESSAGE);
+        	return;
 		} catch (DbxException e) {
 			System.out.println("DbxException");
 			

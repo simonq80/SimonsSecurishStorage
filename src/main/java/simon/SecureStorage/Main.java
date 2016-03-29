@@ -4,44 +4,47 @@
 package simon.SecureStorage;
 
 
-import com.dropbox.core.DbxDownloader;
+//import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.v1.DbxEntry;
-import com.dropbox.core.v1.DbxClientV1;
+//import com.dropbox.core.v1.DbxEntry;
+//import com.dropbox.core.v1.DbxClientV1;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.DownloadErrorException;
-import com.dropbox.core.v2.files.FileMetadata;
+//import com.dropbox.core.v2.files.DownloadErrorException;
+//import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
-import com.dropbox.core.v2.files.UploadErrorException;
-import com.dropbox.core.v2.users.FullAccount;
+//import com.dropbox.core.v2.files.UploadErrorException;
+//import com.dropbox.core.v2.users.FullAccount;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-import java.util.Date;
+import java.util.ArrayList;
+//import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+//import java.awt.event.MouseAdapter;
+//import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+//import java.io.File;
+//import java.io.FileOutputStream;
+//import java.io.FileInputStream;
+//import java.io.InputStream;
+//import java.nio.file.Files;
+//import java.nio.file.Paths;
 import java.io.IOException;
 
-import org.apache.commons.io.FileUtils;
+//import org.apache.commons.io.FileUtils;
 
-import org.jasypt.util.binary.*;
+//import org.jasypt.util.binary.*;
 
 public class Main {
 	
@@ -71,16 +74,37 @@ public class Main {
     
     
     //JFrame allowing the upload/download of files from given paths
-    public static void upDownJFrame(final Account acc, JFrame mainframe, String userPath){
+    public static void upDownJFrame(final Account acc, JFrame mainframe, String userPath, String[] serverFiles){
     	mainframe.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 50, 50));
+    	
+    	JScrollPane scrollPane = new JScrollPane();
+    	final JList<String> list = new JList<String>(serverFiles);
+    	list.setVisibleRowCount(8);
+    	
+    	final JTextField field2 = new JTextField("/");
+    	field2.setPreferredSize(new Dimension(200, 20));
+    	
+    	list.addListSelectionListener(new ListSelectionListener() {
+
+            @Override
+            public void valueChanged(ListSelectionEvent arg0) {
+                if (!arg0.getValueIsAdjusting()) {
+                  field2.setText(list.getSelectedValue().toString());
+                }
+            }
+        });
+    	scrollPane.setViewportView(list);
+    	scrollPane.setPreferredSize(new Dimension(180, 135));
+    	mainframe.add(scrollPane);
+    	
+    	
     	JLabel dataLabel = new JLabel("User File Path");
     	dataLabel.setPreferredSize(new Dimension(150, 20));
     	mainframe.getContentPane().add(dataLabel);
     	final JTextField field1 = new JTextField(userPath);
     	field1.setPreferredSize(new Dimension(200, 20));
     	
-    	final JTextField field2 = new JTextField("/");
-    	field2.setPreferredSize(new Dimension(200, 20));
+    	
     	
     	mainframe.getContentPane().add(field1);
     	JLabel dataLabel2 = new JLabel("Server File Path");
@@ -156,8 +180,8 @@ public class Main {
 		    	userPass[1] = String.valueOf(field2.getPassword());
 		    	path[0] = s2.next();
 		    	if((path[0].charAt(path[0].length()-1) != '/'))path[0]+="/";
-		    	System.out.println(userPass[0]);
-		    	System.out.println(userPass[1]);
+		    	//System.out.println(userPass[0]);
+		    	//System.out.println(userPass[1]);
 		    	s1.close();
 		    	s2.close();
 		    	mainframe.dispose();
@@ -172,8 +196,8 @@ public class Main {
 		    	userPass[1] = String.valueOf(field2.getPassword());
 		    	path[0] = s2.next();
 		    	if((path[0].charAt(path[0].length()-1) != '/'))path[0]+="/";
-		    	System.out.println(userPass[0]);
-		    	System.out.println(userPass[1]);
+		    	//System.out.println(userPass[0]);
+		    	//System.out.println(userPass[1]);
 		    	s1.close();
 		    	s2.close();
 		    	mainframe.dispose();
@@ -263,12 +287,14 @@ public class Main {
     	final Account userA = new Account(userPass[0], userPass[1], key, client, userPath);
     	//check username/password
         if(!userA.validate()){
-        	System.out.println("username/password/key incorrect");
+        	final JPanel panel = new JPanel();
+        	JOptionPane.showMessageDialog(panel, "Invalid Username or Password", "Error", JOptionPane.ERROR_MESSAGE);
         	System.exit(0);
         }
         //check account is admin if accessing admin functions
         if(admin && !userA.adminValidate()){
-        	System.out.println("not admin");
+        	final JPanel panel = new JPanel();
+        	JOptionPane.showMessageDialog(panel, "Not an Admin", "Error", JOptionPane.ERROR_MESSAGE);
         	System.exit(0);
         }
         // Get current account info
@@ -281,13 +307,20 @@ public class Main {
         	result = client.files().listFolder("");
         }catch(DbxException e){System.out.println("ListError");}
         
-        
+        List<String> serverFiles = new ArrayList<String>();
         
 
         while (true) {
             for (Metadata metadata : result.getEntries()) {
-                System.out.println(metadata.getPathLower());
+                //System.out.println(metadata.getPathLower());
+                if(metadata.getPathLower().contains(".encrypted")){
+                	serverFiles.add(metadata.getPathLower().substring(0, metadata.getPathLower().length()-10));
+                }
+                else{
+                	serverFiles.add(metadata.getPathLower());
+                }
             }
+            
             
 
             if (!result.getHasMore()) {
@@ -297,12 +330,14 @@ public class Main {
             	result = client.files().listFolderContinue(result.getCursor());
             }catch(DbxException e){System.out.println("ListError2");}
         }
-        
+        java.util.Collections.sort(serverFiles);
+        String[] serverFilesA = new String[serverFiles.size()];
+        serverFiles.toArray(serverFilesA);
         if(admin){
         	adminJFrame(userA, mainframe);
         }
         else{
-        	upDownJFrame(userA, mainframe, userPath);
+        	upDownJFrame(userA, mainframe, userPath, serverFilesA);
         }
         // Upload "test.txt" to Dropbox
         //userA.SecureUpload("/home/simon/dropbox/userlist.txt", "/userList.txt");
