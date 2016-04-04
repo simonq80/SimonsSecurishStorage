@@ -59,7 +59,7 @@ public class Account {
 		SecureDownload(userPath+"userlist.txt", "/userlist.txt", true);
 		List<String> users = null;
 		try{
-			users = Files.readAllLines(Paths.get(userPath+"userlist.txt"));
+			users = FileUtils.readLines(new File(userPath+"userlist.txt"));
 		}catch(IOException e){System.out.println("readException");}
 		
 		String currentLine;
@@ -87,7 +87,7 @@ public class Account {
 		SecureDownload(userPath+"adminlist.txt", "/adminlist.txt", true);
 		List<String> users = null;
 		try{
-			users = Files.readAllLines(Paths.get(userPath+"adminlist.txt"));
+			users = FileUtils.readLines(new File(userPath+"adminlist.txt"));
 		}catch(IOException e){System.out.println("readException");}
 		
 		String currentLine;
@@ -114,7 +114,7 @@ public class Account {
 		SecureDownload(userPath+"adminlist.txt", "/adminlist.txt", true);
 		List<String> users = null;
 		try{
-			users = Files.readAllLines(Paths.get(userPath+"adminlist.txt"));
+			users = FileUtils.readLines(new File(userPath+"adminlist.txt"));
 		}catch(IOException e){System.out.println("readException");}
 		//check if admin is already in list
 		boolean alreadyThere = false;
@@ -141,7 +141,7 @@ public class Account {
 		SecureDownload(userPath+"adminlist.txt", "/adminlist.txt", true);
 		List<String> users = null;
 		try{
-			users = Files.readAllLines(Paths.get(userPath+"adminlist.txt"));
+			users = FileUtils.readLines(new File(userPath+"adminlist.txt"));
 		}catch(IOException e){System.out.println("readException");}
 		
 		for(int i = 0; i<users.size(); i++){
@@ -165,7 +165,7 @@ public class Account {
 		SecureDownload(userPath+"userlist.txt", "/userlist.txt", true);
 		List<String> users = null;
 		try{
-			users = Files.readAllLines(Paths.get(userPath+"userlist.txt"));
+			users = FileUtils.readLines(new File(userPath+"userlist.txt"));
 		}catch(IOException e){System.out.println("readException");}
 		//check if user is already in list
 		boolean alreadyThere = false;
@@ -174,9 +174,9 @@ public class Account {
 		}
 		//if not add username:encrypted password to list
 		if(!alreadyThere){
-			System.out.println("adding user");
+			//System.out.println("adding user");
 			String ePassword = pe.encryptPassword(password);
-			System.out.println(ePassword);
+			//System.out.println(ePassword);
 			String newLine = username+":"+ePassword;
 			users.add(newLine);
 			//write back to file
@@ -198,7 +198,7 @@ public class Account {
 		SecureDownload(userPath+"userlist.txt", "/userlist.txt", true);
 		List<String> users = null;
 		try{
-			users = Files.readAllLines(Paths.get(userPath+"userlist.txt"));
+			users = FileUtils.readLines(new File(userPath+"userlist.txt"));
 		}catch(IOException e){System.out.println("readException");}
 		
 		//remove user if exists
@@ -304,7 +304,7 @@ public class Account {
     	
     	byte[] encryptedTemp = be.encrypt(temp);
     	String path = userPath+".encrypted";
-    	System.out.println(path);
+    	//System.out.println(path);
     	try{
     		FileUtils.writeByteArrayToFile(new File(path), encryptedTemp);
     	}catch(IOException e){
